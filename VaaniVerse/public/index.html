@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VaaniVerse — AI Voice & Language Platform</title>
+  <meta name="description"
+    content="VaaniVerse is an AI-powered platform for text-to-speech, translation, lyrics generation, music creation, and AI singing." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="/css/styles.css" />
+</head>
+
+<body>
+  <!-- ==================== PRELOADER ==================== -->
+  <div id="preloader">
+    <div class="loader-content">
+      <div class="loader-icon"><i class="fas fa-microphone-alt"></i></div>
+      <h2>VaaniVerse</h2>
+      <div class="loader-bar">
+        <div class="loader-progress"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== AUTH PAGE ==================== -->
+  <section id="auth-page" class="page active">
+    <div class="auth-bg">
+      <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+        <div class="shape shape-5"></div>
+      </div>
+    </div>
+    <div class="auth-container">
+      <div class="auth-brand">
+        <div class="brand-icon"><i class="fas fa-microphone-alt"></i></div>
+        <h1>VaaniVerse</h1>
+        <p class="brand-tagline">AI-Powered Voice & Language Universe</p>
+      </div>
+      <!-- Login Form -->
+      <div id="login-form" class="auth-form active">
+        <h2>Welcome Back</h2>
+        <p class="auth-subtitle">Sign in to continue your journey</p>
+        <div class="form-group">
+          <div class="input-icon"><i class="fas fa-envelope"></i></div>
+          <input type="email" id="login-email" placeholder="Email Address" autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <div class="input-icon"><i class="fas fa-lock"></i></div>
+          <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" />
+        </div>
+        <button id="login-btn" class="btn btn-primary btn-full"><span>Sign In</span><i
+            class="fas fa-arrow-right"></i></button>
+        <p class="auth-switch">Don't have an account? <a href="#" id="show-signup">Create one</a></p>
+      </div>
+      <!-- Signup Form -->
+      <div id="signup-form" class="auth-form">
+        <h2>Create Account</h2>
+        <p class="auth-subtitle">Join VaaniVerse today</p>
+        <div class="form-group">
+          <div class="input-icon"><i class="fas fa-user"></i></div>
+          <input type="text" id="signup-name" placeholder="Full Name" autocomplete="name" />
+        </div>
+        <div class="form-group">
+          <div class="input-icon"><i class="fas fa-envelope"></i></div>
+          <input type="email" id="signup-email" placeholder="Email Address" autocomplete="email" />
+        </div>
+        <div class="form-group">
+          <div class="input-icon"><i class="fas fa-lock"></i></div>
+          <input type="password" id="signup-password" placeholder="Password" autocomplete="new-password" />
+        </div>
+        <div class="form-group">
+          <div class="input-icon"><i class="fas fa-lock"></i></div>
+          <input type="password" id="signup-confirm" placeholder="Confirm Password" autocomplete="new-password" />
+        </div>
+        <button id="signup-btn" class="btn btn-primary btn-full"><span>Create Account</span><i
+            class="fas fa-arrow-right"></i></button>
+        <p class="auth-switch">Already have an account? <a href="#" id="show-login">Sign in</a></p>
+      </div>
+      <div id="auth-error" class="error-msg"></div>
+    </div>
+  </section>
+
+  <!-- ==================== MAIN APP (separate page) ==================== -->
+  <section id="app-page" class="page">
+    <!-- Navigation -->
+    <nav id="navbar">
+      <div class="nav-container">
+        <div class="nav-brand" id="nav-home-link"><i class="fas fa-microphone-alt"></i><span>VaaniVerse</span></div>
+        <div class="nav-links">
+          <a href="#" class="nav-link active" data-page="home"><i class="fas fa-home"></i> Home</a>
+          <a href="#" class="nav-link" data-page="models"><i class="fas fa-cubes"></i> Models</a>
+          <a href="#" class="nav-link" data-page="about"><i class="fas fa-info-circle"></i> About Us</a>
+          <div class="nav-user">
+            <span id="nav-username"></span>
+            <button id="logout-btn" class="btn btn-outline btn-sm"><i class="fas fa-sign-out-alt"></i> Logout</button>
+          </div>
+        </div>
+        <button id="mobile-menu-btn" class="mobile-menu-btn"><i class="fas fa-bars"></i></button>
+      </div>
+    </nav>
+    <div id="mobile-menu" class="mobile-menu">
+      <a href="#" class="mobile-link" data-page="home"><i class="fas fa-home"></i> Home</a>
+      <a href="#" class="mobile-link" data-page="models"><i class="fas fa-cubes"></i> Models</a>
+      <a href="#" class="mobile-link" data-page="about"><i class="fas fa-info-circle"></i> About Us</a>
+      <button id="mobile-logout-btn" class="btn btn-outline btn-sm"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+
+    <!-- ===== HOME PAGE ===== -->
+    <div id="home-page" class="app-section active">
+      <div class="hero-section">
+        <div class="hero-particles" id="hero-particles"></div>
+        <div class="hero-content">
+          <div class="hero-badge">🚀 AI-Powered Platform</div>
+          <h1 class="hero-title">Welcome to <span class="gradient-text">VaaniVerse</span></h1>
+          <p class="hero-description">Your all-in-one AI-powered voice and language platform. Transform text to speech,
+            translate across 30+ languages, generate song lyrics, create music, and even have AI sing your songs — all
+            with cutting-edge artificial intelligence.</p>
+          <div class="hero-buttons">
+            <button class="btn btn-primary btn-lg" id="hero-explore-btn"><i class="fas fa-rocket"></i> Explore
+              Models</button>
+            <button class="btn btn-glass btn-lg" id="hero-learn-btn"><i class="fas fa-play-circle"></i> Learn
+              More</button>
+          </div>
+        </div>
+      </div>
+      <div class="features-section">
+        <h2 class="section-title">Powerful <span class="gradient-text">AI Features</span></h2>
+        <p class="section-subtitle">Experience the future of voice and language technology</p>
+        <div class="features-grid">
+          <div class="feature-card" data-model="tts">
+            <div class="feature-icon" style="--accent: #6366f1;"><i class="fas fa-volume-up"></i></div>
+            <h3>Text to Speech</h3>
+            <p>Convert any text to natural-sounding speech with celebrity voice presets including Modi and Kohli.</p>
+          </div>
+          <div class="feature-card" data-model="translation">
+            <div class="feature-icon" style="--accent: #06b6d4;"><i class="fas fa-language"></i></div>
+            <h3>Translation</h3>
+            <p>Translate text and speech across 30+ languages including Indian regional languages.</p>
+          </div>
+          <div class="feature-card" data-model="lyrics">
+            <div class="feature-icon" style="--accent: #f43f5e;"><i class="fas fa-music"></i></div>
+            <h3>Lyrics Generation</h3>
+            <p>Generate complete song lyrics in any genre, mood, and theme with AI assistance.</p>
+          </div>
+          <div class="feature-card" data-model="music">
+            <div class="feature-icon" style="--accent: #10b981;"><i class="fas fa-headphones"></i></div>
+            <h3>Music Generation</h3>
+            <p>Create original multi-layered music compositions in various genres.</p>
+          </div>
+          <div class="feature-card" data-model="song">
+            <div class="feature-icon" style="--accent: #f59e0b;"><i class="fas fa-microphone"></i></div>
+            <h3>Song Generation</h3>
+            <p>Turn lyrics into a full song with AI vocals, background music, and raaga.</p>
+          </div>
+        </div>
+      </div>
+      <div class="stats-section">
+        <div class="stat-card">
+          <div class="stat-number" data-count="30">0</div>
+          <div class="stat-label">Languages Supported</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" data-count="5">0</div>
+          <div class="stat-label">AI Models</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" data-count="10">0</div>
+          <div class="stat-label">Music Genres</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" data-count="100">0</div>
+          <div class="stat-label">% Free to Use</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MODELS PAGE ===== -->
+    <div id="models-page" class="app-section">
+      <div class="models-hero">
+        <h1 class="section-title">AI <span class="gradient-text">Models</span></h1>
+        <p class="section-subtitle">Choose a model to get started with your AI-powered creation</p>
+      </div>
+      <div class="models-grid">
+        <!-- TTS -->
+        <div class="model-card" id="model-card-tts">
+          <div class="model-card-glow" style="--glow: #6366f1;"></div>
+          <div class="model-card-content">
+            <div class="model-icon" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);"><i
+                class="fas fa-volume-up"></i></div>
+            <h3>Text to Speech</h3>
+            <p>Convert text to natural speech. Includes celebrity voice presets and voice cloning.</p>
+            <ul class="model-features-list">
+              <li><i class="fas fa-check"></i> Text to Speech</li>
+              <li><i class="fas fa-check"></i> Speech to Speech</li>
+              <li><i class="fas fa-check"></i> Voice Cloning</li>
+              <li><i class="fas fa-check"></i> Modi & Kohli Voices</li>
+            </ul>
+            <button class="btn btn-primary btn-full" onclick="openModel('tts')"><i class="fas fa-arrow-right"></i>
+              Launch Model</button>
+          </div>
+        </div>
+        <!-- Translation -->
+        <div class="model-card" id="model-card-translation">
+          <div class="model-card-glow" style="--glow: #06b6d4;"></div>
+          <div class="model-card-content">
+            <div class="model-icon" style="background: linear-gradient(135deg, #06b6d4, #0ea5e9);"><i
+                class="fas fa-language"></i></div>
+            <h3>Translation</h3>
+            <p>Multilingual text and speech translation with voice selection.</p>
+            <ul class="model-features-list">
+              <li><i class="fas fa-check"></i> 30+ Languages</li>
+              <li><i class="fas fa-check"></i> Text & Speech Input</li>
+              <li><i class="fas fa-check"></i> Voice Selection</li>
+              <li><i class="fas fa-check"></i> Speak Translation</li>
+            </ul>
+            <button class="btn btn-primary btn-full" onclick="openModel('translation')"><i
+                class="fas fa-arrow-right"></i> Launch Model</button>
+          </div>
+        </div>
+        <!-- Lyrics -->
+        <div class="model-card" id="model-card-lyrics">
+          <div class="model-card-glow" style="--glow: #f43f5e;"></div>
+          <div class="model-card-content">
+            <div class="model-icon" style="background: linear-gradient(135deg, #f43f5e, #e11d48);"><i
+                class="fas fa-music"></i></div>
+            <h3>Lyrics Generation</h3>
+            <p>Generate complete professional song lyrics in any genre and mood.</p>
+            <ul class="model-features-list">
+              <li><i class="fas fa-check"></i> Multiple Genres</li>
+              <li><i class="fas fa-check"></i> Mood Selection</li>
+              <li><i class="fas fa-check"></i> Full Song Lyrics</li>
+              <li><i class="fas fa-check"></i> Translation Support</li>
+            </ul>
+            <button class="btn btn-primary btn-full" onclick="openModel('lyrics')"><i class="fas fa-arrow-right"></i>
+              Launch Model</button>
+          </div>
+        </div>
+        <!-- Music -->
+        <div class="model-card" id="model-card-music">
+          <div class="model-card-glow" style="--glow: #10b981;"></div>
+          <div class="model-card-content">
+            <div class="model-icon" style="background: linear-gradient(135deg, #10b981, #059669);"><i
+                class="fas fa-headphones"></i></div>
+            <h3>Music Generation</h3>
+            <p>Create original AI-composed multi-layered music in various genres.</p>
+            <ul class="model-features-list">
+              <li><i class="fas fa-check"></i> 10+ Genres</li>
+              <li><i class="fas fa-check"></i> Melody + Chords + Bass</li>
+              <li><i class="fas fa-check"></i> Downloadable Audio</li>
+              <li><i class="fas fa-check"></i> Real-time Visualizer</li>
+            </ul>
+            <button class="btn btn-primary btn-full" onclick="openModel('music')"><i class="fas fa-arrow-right"></i>
+              Launch Model</button>
+          </div>
+        </div>
+        <!-- Song Generation -->
+        <div class="model-card" id="model-card-song">
+          <div class="model-card-glow" style="--glow: #f59e0b;"></div>
+          <div class="model-card-content">
+            <div class="model-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);"><i
+                class="fas fa-microphone"></i></div>
+            <h3>Song Generation</h3>
+            <p>AI sings your lyrics with male or female vocals over generated music.</p>
+            <ul class="model-features-list">
+              <li><i class="fas fa-check"></i> Male & Female Singers</li>
+              <li><i class="fas fa-check"></i> Background Music</li>
+              <li><i class="fas fa-check"></i> Uses Generated Lyrics</li>
+              <li><i class="fas fa-check"></i> Full Vocal Performance</li>
+            </ul>
+            <button class="btn btn-primary btn-full" onclick="openModel('song')"><i class="fas fa-arrow-right"></i>
+              Launch Model</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TTS MODEL PAGE ===== -->
+    <div id="tts-page" class="app-section">
+      <div class="model-page-header">
+        <button class="btn btn-glass btn-sm" onclick="openModel('back')"><i class="fas fa-arrow-left"></i> Back to
+          Models</button>
+        <h1><i class="fas fa-volume-up" style="color: #6366f1;"></i> Text to Speech</h1>
+        <p>Convert text to speech, perform speech-to-speech, and use celebrity voice presets</p>
+      </div>
+      <div class="model-workspace">
+        <div class="workspace-tabs">
+          <button class="tab-btn active" data-tab="tts-text"><i class="fas fa-keyboard"></i> Text Input</button>
+          <button class="tab-btn" data-tab="tts-speech"><i class="fas fa-microphone"></i> Speech Input</button>
+        </div>
+        <div id="tts-text-tab" class="tab-content active">
+          <div class="input-area">
+            <label>Enter your text</label>
+            <textarea id="tts-input-text" placeholder="Type or paste your text here..." rows="5"></textarea>
+          </div>
+        </div>
+        <div id="tts-speech-tab" class="tab-content">
+          <div class="speech-record-area">
+            <button id="tts-record-btn" class="record-btn"><i class="fas fa-microphone"></i></button>
+            <p id="tts-record-status">Click to start recording</p>
+            <div id="tts-speech-result" class="speech-result"></div>
+          </div>
+        </div>
+        <!-- Voice Selection -->
+        <div class="options-panel">
+          <div class="option-group">
+            <label>Select Voice</label>
+            <select id="tts-voice-select"></select>
+          </div>
+          <div class="option-group">
+            <label>Speed</label>
+            <input type="range" id="tts-speed" min="0.5" max="2" step="0.1" value="1" />
+            <span id="tts-speed-val">1.0x</span>
+          </div>
+          <div class="option-group">
+            <label>Pitch</label>
+            <input type="range" id="tts-pitch" min="0.5" max="2" step="0.1" value="1" />
+            <span id="tts-pitch-val">1.0x</span>
+          </div>
+        </div>
+        <!-- Celebrity Voice Presets -->
+        <div class="voice-preset-section">
+          <h4><i class="fas fa-star"></i> Celebrity Voice Presets</h4>
+          <div class="voice-presets">
+            <span class="voice-preset-tag" data-preset="modi">🇮🇳 Narendra Modi</span>
+            <span class="voice-preset-tag" data-preset="kohli">🏏 Virat Kohli</span>
+            <span class="voice-preset-tag" data-preset="deep-male">🎙️ Deep Male</span>
+            <span class="voice-preset-tag" data-preset="soft-female">👩 Soft Female</span>
+            <span class="voice-preset-tag" data-preset="narrator">📖 Narrator</span>
+            <span class="voice-preset-tag" data-preset="default">🔄 Default</span>
+          </div>
+        </div>
+        <!-- Voice Cloning -->
+        <div class="voice-clone-section">
+          <div class="clone-header">
+            <h3><i class="fas fa-clone"></i> Voice Cloning</h3>
+            <span class="badge badge-info">Upload Your Voice</span>
+          </div>
+          <p class="clone-desc">Upload a voice sample — we'll analyze the pitch characteristics and apply them to
+            generated speech</p>
+          <div class="upload-area" id="tts-voice-upload">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p>Drag & drop your voice sample or <span class="upload-link">browse</span></p>
+            <p class="upload-hint">Supported: MP3, WAV, OGG (max 10MB)</p>
+            <input type="file" id="tts-voice-file" accept="audio/*" hidden />
+          </div>
+          <div id="tts-uploaded-voice" class="uploaded-file" style="display:none;">
+            <i class="fas fa-file-audio"></i>
+            <span id="tts-voice-filename"></span>
+            <button class="btn-icon" id="tts-remove-voice"><i class="fas fa-times"></i></button>
+          </div>
+          <div id="tts-clone-status" style="margin-top:0.5rem; font-size:0.8125rem; color: var(--accent-tertiary);">
+          </div>
+        </div>
+        <button id="tts-generate-btn" class="btn btn-primary btn-lg btn-full"><i class="fas fa-play"></i> Generate
+          Speech</button>
+        <div id="tts-output" class="output-section" style="display:none;">
+          <h3><i class="fas fa-wave-square"></i> Generated Speech</h3>
+          <div class="audio-player">
+            <div id="tts-audio-wave" class="audio-wave"></div>
+            <div class="audio-controls">
+              <button id="tts-play-btn" class="play-btn"><i class="fas fa-play"></i></button>
+              <button id="tts-stop-btn" class="stop-btn"><i class="fas fa-stop"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TRANSLATION MODEL PAGE ===== -->
+    <div id="translation-page" class="app-section">
+      <div class="model-page-header">
+        <button class="btn btn-glass btn-sm" onclick="openModel('back')"><i class="fas fa-arrow-left"></i> Back to
+          Models</button>
+        <h1><i class="fas fa-language" style="color: #06b6d4;"></i> Translation</h1>
+        <p>Translate text and speech across 30+ languages with voice selection</p>
+      </div>
+      <div class="model-workspace">
+        <div class="workspace-tabs">
+          <button class="tab-btn active" data-tab="trans-text"><i class="fas fa-keyboard"></i> Text Input</button>
+          <button class="tab-btn" data-tab="trans-speech"><i class="fas fa-microphone"></i> Speech Input</button>
+        </div>
+        <div id="trans-text-tab" class="tab-content active">
+          <div class="translation-grid">
+            <div class="trans-input-side">
+              <div class="lang-selector"><label>From</label><select id="trans-source-lang"></select></div>
+              <textarea id="trans-input-text" placeholder="Enter text to translate..." rows="6"></textarea>
+            </div>
+            <div class="trans-swap"><button id="trans-swap-btn" class="swap-btn"><i
+                  class="fas fa-exchange-alt"></i></button></div>
+            <div class="trans-output-side">
+              <div class="lang-selector"><label>To</label><select id="trans-target-lang"></select></div>
+              <div id="trans-output-text" class="trans-output-box">Translation will appear here...</div>
+            </div>
+          </div>
+        </div>
+        <div id="trans-speech-tab" class="tab-content">
+          <div class="speech-record-area">
+            <button id="trans-record-btn" class="record-btn"><i class="fas fa-microphone"></i></button>
+            <p id="trans-record-status">Click to start recording</p>
+            <div id="trans-speech-result" class="speech-result"></div>
+          </div>
+          <div class="translation-grid" style="margin-top: 1.5rem;">
+            <div class="trans-input-side">
+              <div class="lang-selector"><label>Detected Language</label><select id="trans-speech-source-lang"></select>
+              </div>
+              <div id="trans-speech-input-text" class="trans-output-box">Recognized speech will appear here...</div>
+            </div>
+            <div class="trans-swap"><button class="swap-btn" id="trans-speech-swap-btn"><i
+                  class="fas fa-exchange-alt"></i></button></div>
+            <div class="trans-output-side">
+              <div class="lang-selector"><label>Translate To</label><select id="trans-speech-target-lang"></select>
+              </div>
+              <div id="trans-speech-output-text" class="trans-output-box">Translation will appear here...</div>
+            </div>
+          </div>
+        </div>
+        <!-- Voice Selection for Translation -->
+        <div class="trans-voice-options">
+          <label
+            style="font-size:0.875rem; font-weight:600; color:var(--text-secondary); margin-bottom:0.5rem; display:block;"><i
+              class="fas fa-volume-up"></i> Voice for Speech Output</label>
+          <select id="trans-voice-select" style="margin-bottom: 0.5rem;"></select>
+          <div class="voice-presets" style="margin-top:0.5rem;">
+            <span class="voice-preset-tag trans-preset" data-preset="default">🔄 Default</span>
+            <span class="voice-preset-tag trans-preset" data-preset="modi">🇮🇳 Modi Style</span>
+            <span class="voice-preset-tag trans-preset" data-preset="kohli">🏏 Kohli Style</span>
+            <span class="voice-preset-tag trans-preset" data-preset="deep-male">🎙️ Deep Male</span>
+            <span class="voice-preset-tag trans-preset" data-preset="soft-female">👩 Soft Female</span>
+          </div>
+        </div>
+        <!-- Voice Cloning -->
+        <div class="voice-clone-section">
+          <div class="clone-header">
+            <h3><i class="fas fa-clone"></i> Speak Translation in Your Voice</h3>
+          </div>
+          <p class="clone-desc">Upload your voice sample — translated text will be spoken with your voice
+            characteristics</p>
+          <div class="upload-area" id="trans-voice-upload">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p>Drag & drop your voice sample or <span class="upload-link">browse</span></p>
+            <p class="upload-hint">Supported: MP3, WAV, OGG (max 10MB)</p>
+            <input type="file" id="trans-voice-file" accept="audio/*" hidden />
+          </div>
+          <div id="trans-uploaded-voice" class="uploaded-file" style="display:none;">
+            <i class="fas fa-file-audio"></i>
+            <span id="trans-voice-filename"></span>
+            <button class="btn-icon" id="trans-remove-voice"><i class="fas fa-times"></i></button>
+          </div>
+          <div id="trans-clone-status" style="margin-top:0.5rem; font-size:0.8125rem; color: var(--accent-tertiary);">
+          </div>
+        </div>
+        <div class="action-buttons">
+          <button id="trans-translate-btn" class="btn btn-primary btn-lg"><i class="fas fa-language"></i>
+            Translate</button>
+          <button id="trans-speak-btn" class="btn btn-glass btn-lg" style="display:none;"><i
+              class="fas fa-volume-up"></i> Speak Translation</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== LYRICS MODEL PAGE ===== -->
+    <div id="lyrics-page" class="app-section">
+      <div class="model-page-header">
+        <button class="btn btn-glass btn-sm" onclick="openModel('back')"><i class="fas fa-arrow-left"></i> Back to
+          Models</button>
+        <h1><i class="fas fa-music" style="color: #f43f5e;"></i> Lyrics Generation</h1>
+        <p>Generate complete professional song lyrics with AI</p>
+      </div>
+      <div class="model-workspace">
+        <div class="lyrics-options-grid">
+          <div class="option-group">
+            <label><i class="fas fa-guitar"></i> Genre</label>
+            <select id="lyrics-genre">
+              <option value="pop">Pop</option>
+              <option value="rock">Rock</option>
+              <option value="hiphop">Hip-Hop / Rap</option>
+              <option value="romantic">Romantic / Ballad</option>
+              <option value="classical">Classical</option>
+              <option value="folk">Folk / Country</option>
+              <option value="rnb">R&B / Soul</option>
+              <option value="electronic">Electronic / EDM</option>
+              <option value="jazz">Jazz</option>
+              <option value="blues">Blues</option>
+              <option value="indie">Indie / Alternative</option>
+              <option value="metal">Metal</option>
+            </select>
+          </div>
+          <div class="option-group">
+            <label><i class="fas fa-theater-masks"></i> Mood</label>
+            <select id="lyrics-mood">
+              <option value="happy">Happy / Upbeat</option>
+              <option value="sad">Sad / Melancholic</option>
+              <option value="energetic">Energetic / Powerful</option>
+              <option value="peaceful">Peaceful / Calm</option>
+              <option value="nostalgic">Nostalgic</option>
+              <option value="romantic">Romantic</option>
+              <option value="melancholic">Dark / Melancholic</option>
+              <option value="inspirational">Inspirational</option>
+            </select>
+          </div>
+          <div class="option-group">
+            <label><i class="fas fa-lightbulb"></i> Theme / Topic</label>
+            <input type="text" id="lyrics-theme" placeholder="e.g., love, freedom, adventure..." />
+          </div>
+          <div class="option-group">
+            <label><i class="fas fa-tachometer-alt"></i> Tempo</label>
+            <select id="lyrics-tempo">
+              <option value="slow">Slow</option>
+              <option value="moderate">Moderate</option>
+              <option value="fast">Fast</option>
+              <option value="variable">Variable</option>
+            </select>
+          </div>
+        </div>
+        <button id="lyrics-generate-btn" class="btn btn-primary btn-lg btn-full"><i class="fas fa-magic"></i> Generate
+          Lyrics</button>
+        <div id="lyrics-output" class="output-section" style="display:none;">
+          <div class="lyrics-output-header">
+            <h3><i class="fas fa-scroll"></i> Generated Lyrics</h3>
+            <div class="lyrics-actions">
+              <button id="lyrics-copy-btn" class="btn btn-glass btn-sm"><i class="fas fa-copy"></i> Copy</button>
+              <button id="lyrics-speak-btn" class="btn btn-glass btn-sm"><i class="fas fa-volume-up"></i> Read
+                Aloud</button>
+              <button id="lyrics-to-song-btn" class="btn btn-primary btn-sm"><i class="fas fa-microphone"></i> Send to
+                Song Generator</button>
+            </div>
+          </div>
+          <pre id="lyrics-result" class="lyrics-text"></pre>
+          <div class="lyrics-translate-section">
+            <h4><i class="fas fa-language"></i> Translate Lyrics</h4>
+            <div class="translate-controls">
+              <select id="lyrics-translate-lang"></select>
+              <button id="lyrics-translate-btn" class="btn btn-primary"><i class="fas fa-language"></i>
+                Translate</button>
+            </div>
+            <pre id="lyrics-translated" class="lyrics-text" style="display:none;"></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MUSIC MODEL PAGE ===== -->
+    <div id="music-page" class="app-section">
+      <div class="model-page-header">
+        <button class="btn btn-glass btn-sm" onclick="openModel('back')"><i class="fas fa-arrow-left"></i> Back to
+          Models</button>
+        <h1><i class="fas fa-headphones" style="color: #10b981;"></i> Music Generation</h1>
+        <p>Create original AI-composed multi-layered music in any genre</p>
+      </div>
+      <div class="model-workspace">
+        <div class="music-options-grid">
+          <div class="option-group">
+            <label><i class="fas fa-guitar"></i> Genre</label>
+            <select id="music-genre">
+              <option value="pop">Pop</option>
+              <option value="classical">Classical</option>
+              <option value="hiphop">Hip-Hop</option>
+              <option value="rock">Rock</option>
+              <option value="jazz">Jazz</option>
+              <option value="electronic">Electronic / EDM</option>
+              <option value="ambient">Ambient / Chill</option>
+              <option value="folk">Folk</option>
+              <option value="rnb">R&B</option>
+              <option value="blues">Blues</option>
+            </select>
+          </div>
+          <div class="option-group">
+            <label><i class="fas fa-sliders-h"></i> Type / Style</label>
+            <select id="music-type">
+              <option value="melody">Melody</option>
+              <option value="beat">Beat / Rhythm</option>
+              <option value="chord">Chord Progression</option>
+              <option value="full">Full Composition</option>
+            </select>
+          </div>
+          <div class="option-group">
+            <label><i class="fas fa-tachometer-alt"></i> Tempo (BPM)</label>
+            <input type="range" id="music-tempo" min="60" max="180" value="120" />
+            <span id="music-tempo-val">120 BPM</span>
+          </div>
+          <div class="option-group">
+            <label><i class="fas fa-clock"></i> Duration (seconds)</label>
+            <input type="range" id="music-duration" min="5" max="30" value="15" />
+            <span id="music-duration-val">15s</span>
+          </div>
+        </div>
+        <button id="music-generate-btn" class="btn btn-primary btn-lg btn-full"><i class="fas fa-music"></i> Generate
+          Music</button>
+        <div id="music-output" class="output-section" style="display:none;">
+          <h3><i class="fas fa-wave-square"></i> Generated Music</h3>
+          <div class="music-visualizer"><canvas id="music-canvas" width="800" height="200"></canvas></div>
+          <div class="music-controls">
+            <button id="music-play-btn" class="play-btn"><i class="fas fa-play"></i></button>
+            <button id="music-stop-btn" class="stop-btn"><i class="fas fa-stop"></i></button>
+            <button id="music-download-btn" class="btn btn-glass btn-sm"><i class="fas fa-download"></i>
+              Download</button>
+          </div>
+          <div class="music-meta" id="music-meta"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SONG GENERATION MODEL PAGE ===== -->
+    <div id="song-page" class="app-section">
+      <div class="model-page-header">
+        <button class="btn btn-glass btn-sm" onclick="openModel('back')"><i class="fas fa-arrow-left"></i> Back to
+          Models</button>
+        <h1><i class="fas fa-microphone" style="color: #f59e0b;"></i> Song Generation</h1>
+        <p>Turn your lyrics into a full AI-sung song with vocals and background music</p>
+      </div>
+      <div class="model-workspace">
+        <!-- Singer Selection -->
+        <label
+          style="font-size:0.875rem; font-weight:600; color:var(--text-secondary); margin-bottom:0.75rem; display:block;"><i
+            class="fas fa-user-music"></i> Choose Singer</label>
+        <div class="singer-selection">
+          <div class="singer-card selected" data-singer="male">
+            <div class="singer-avatar"><i class="fas fa-male"></i></div>
+            <div class="singer-name">Arjun (Male)</div>
+            <div class="singer-type">Deep Vocals • Raaga</div>
+          </div>
+          <div class="singer-card" data-singer="female">
+            <div class="singer-avatar" style="background: linear-gradient(135deg, #f43f5e, #ec4899);"><i
+                class="fas fa-female"></i></div>
+            <div class="singer-name">Priya (Female)</div>
+            <div class="singer-type">Melodic Vocals • Classical</div>
+          </div>
+          <div class="singer-card" data-singer="male-high">
+            <div class="singer-avatar" style="background: linear-gradient(135deg, #f59e0b, #d97706);"><i
+                class="fas fa-user"></i></div>
+            <div class="singer-name">Rohan (Male High)</div>
+            <div class="singer-type">High Pitch • Pop</div>
+          </div>
+          <div class="singer-card" data-singer="female-deep">
+            <div class="singer-avatar" style="background: linear-gradient(135deg, #10b981, #059669);"><i
+                class="fas fa-user"></i></div>
+            <div class="singer-name">Kavya (Female Deep)</div>
+            <div class="singer-type">Deep Vocals • Soulful</div>
+          </div>
+        </div>
+        <!-- Song Options -->
+        <div class="song-options-grid">
+          <div class="option-group">
+            <label><i class="fas fa-guitar"></i> Music Genre</label>
+            <select id="song-genre">
+              <option value="pop">Pop</option>
+              <option value="classical">Classical / Raaga</option>
+              <option value="bollywood">Bollywood</option>
+              <option value="rock">Rock</option>
+              <option value="folk">Folk</option>
+              <option value="jazz">Jazz</option>
+              <option value="rnb">R&B</option>
+              <option value="hiphop">Hip-Hop</option>
+            </select>
+          </div>
+          <div class="option-group">
+            <label><i class="fas fa-tachometer-alt"></i> Tempo</label>
+            <select id="song-tempo">
+              <option value="slow">Slow (Ballad)</option>
+              <option value="medium" selected>Medium</option>
+              <option value="fast">Fast (Upbeat)</option>
+            </select>
+          </div>
+        </div>
+        <!-- Lyrics Input -->
+        <label
+          style="font-size:0.875rem; font-weight:600; color:var(--text-secondary); margin-bottom:0.5rem; display:block;"><i
+            class="fas fa-scroll"></i> Lyrics (paste from Lyrics Generator or type your own)</label>
+        <textarea id="song-lyrics-input" class="song-lyrics-input"
+          placeholder="Paste your lyrics here or generate lyrics from the Lyrics Generation model first...&#10;&#10;Tip: Use the 'Send to Song Generator' button in Lyrics model to auto-fill these lyrics."></textarea>
+
+        <button id="song-generate-btn" class="btn btn-primary btn-lg btn-full"><i class="fas fa-play"></i> Generate
+          Song</button>
+
+        <div id="song-output" class="output-section" style="display:none;">
+          <h3><i class="fas fa-compact-disc"></i> Generated Song</h3>
+          <div class="music-visualizer"><canvas id="song-canvas" width="800" height="200"></canvas></div>
+          <div class="music-controls">
+            <button id="song-play-btn" class="play-btn"><i class="fas fa-play"></i></button>
+            <button id="song-stop-btn" class="stop-btn"><i class="fas fa-stop"></i></button>
+            <span id="song-status" style="margin-left: 1rem; font-size: 0.875rem; color: var(--text-secondary);"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ABOUT PAGE ===== -->
+    <div id="about-page" class="app-section">
+      <div class="about-hero">
+        <h1 class="section-title">About <span class="gradient-text">VaaniVerse</span></h1>
+        <p class="section-subtitle">Bridging languages and voices with the power of AI</p>
+      </div>
+      <div class="about-content">
+        <div class="about-card">
+          <div class="about-icon"><i class="fas fa-bullseye"></i></div>
+          <h3>Our Mission</h3>
+          <p>VaaniVerse aims to break language barriers and make voice technology accessible to everyone. We believe
+            that every voice matters, and every language deserves to be heard.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-icon"><i class="fas fa-eye"></i></div>
+          <h3>Our Vision</h3>
+          <p>To create a world where language is no longer a barrier — where anyone can communicate, create, and express
+            themselves freely across all languages and cultures.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-icon"><i class="fas fa-cogs"></i></div>
+          <h3>Technology Stack</h3>
+          <p>Built with Node.js, Express, Web Speech API, Web Audio API, and MyMemory Translation API. Features
+            multi-layered music generation and AI vocal synthesis.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-icon"><i class="fas fa-users"></i></div>
+          <h3>Our Team</h3>
+          <p>VaaniVerse is developed as a major college project by a passionate team of students committed to innovation
+            and excellence in AI technology.</p>
+        </div>
+      </div>
+      <div class="about-languages">
+        <h3>Supported Languages</h3>
+        <div class="lang-tags" id="lang-tags"></div>
+      </div>
+      <div class="about-footer-section">
+        <p>© 2026 VaaniVerse. All rights reserved. | Built with ❤️ and AI</p>
+      </div>
+    </div>
+
+    <div id="toast-container"></div>
+  </section>
+
+  <script src="/js/app.js"></script>
+</body>
+
+</html>
