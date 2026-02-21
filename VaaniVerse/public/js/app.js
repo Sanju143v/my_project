@@ -45,6 +45,7 @@
         setTimeout(() => document.getElementById('preloader').classList.add('hidden'), 1800);
         if (authToken && userName) showApp(); else showAuth();
         initAuth(); initNavigation(); initTTS(); initTranslation(); initLyrics(); initMusic(); initSong();
+        initStoryTelling(); initPodcast(); initMashup(); initStudio(); initMood();
         initParticles(); initAboutLanguages(); initScrollAnimations();
     });
 
@@ -499,10 +500,12 @@
             const tempo = parseInt(document.getElementById('music-tempo').value), duration = parseInt(document.getElementById('music-duration').value);
             const btn = document.getElementById('music-generate-btn'); btn.classList.add('loading');
             try {
+                const instrument = document.getElementById('music-instrument').value;
                 const data = await apiCall('/api/music/config', 'POST', { genre, type });
-                generatedMusicData = { ...data, tempo, duration };
+                generatedMusicData = { ...data, tempo, duration, instrument };
                 document.getElementById('music-output').style.display = 'block';
-                document.getElementById('music-meta').innerHTML = `<strong>Genre:</strong> ${genre} | <strong>Type:</strong> ${type} | <strong>Tempo:</strong> ${tempo} BPM | <strong>Duration:</strong> ${duration}s | <strong>Scale:</strong> ${data.scale}`;
+                const instLabel = instrument === 'auto' ? 'Auto' : instrument.charAt(0).toUpperCase() + instrument.slice(1);
+                document.getElementById('music-meta').innerHTML = `<strong>Genre:</strong> ${genre} | <strong>Type:</strong> ${type} | <strong>Instrument:</strong> ${instLabel} | <strong>Tempo:</strong> ${tempo} BPM | <strong>Duration:</strong> ${duration}s | <strong>Scale:</strong> ${data.scale}`;
                 drawVisualization('music-canvas', data.notes);
                 showToast('Music generated! Click play to listen.', 'success');
             } catch (e) { showToast('Failed: ' + e.message, 'error'); } finally { btn.classList.remove('loading'); }
@@ -526,57 +529,103 @@
         if (isSong) { songAudioCtx = ctx; songPlaying = true; songNodes = []; } else { audioContext = ctx; musicPlaying = true; musicNodes = []; }
         document.getElementById(playBtnId).innerHTML = '<i class="fas fa-pause"></i>';
 
-        const { notes, tempo, duration, genre } = data;
+        const { notes, tempo, duration, genre, instrument } = data;
         const beatDur = 60 / tempo;
         const chords = CHORD_PROGRESSIONS[genre] || CHORD_PROGRESSIONS.pop;
         const baseNote = notes[0]?.midi || 60;
+        const inst = instrument || 'auto';
 
-        // Master gain
-        const master = ctx.createGain(); master.gain.value = 0.6; master.connect(ctx.destination);
+        // Instrument-specific waveform selection
+        function getWaveType(layer) {
+            if (inst === 'auto') {
+                if (layer === 'bass') return 'sine';
+                if (layer === 'chord') return genre === 'classical' || genre === 'ambient' ? 'sine' : 'triangle';
+                return genre === 'rock' ? 'sawtooth' : genre === 'electronic' ? 'square' : 'triangle';
+            }
+            const map = {
+                piano: { bass: 'sine', chord: 'triangle', melody: 'sine' },
+                guitar: { bass: 'sawtooth', chord: 'triangle', melody: 'sawtooth' },
+                flute: { bass: 'sine', chord: 'sine', melody: 'sine' },
+                sitar: { bass: 'sawtooth', chord: 'sawtooth', melody: 'sawtooth' },
+                violin: { bass: 'triangle', chord: 'triangle', melody: 'triangle' },
+                drums: { bass: 'square', chord: 'square', melody: 'square' },
+                synth: { bass: 'square', chord: 'sawtooth', melody: 'square' }
+            };
+            return (map[inst] && map[inst][layer]) || 'triangle';
+        }
+
+        // Master gain + Reverb (delay-based)
+        const master = ctx.createGain(); master.gain.value = 0.55;
+        const reverbDelay = ctx.createDelay(); reverbDelay.delayTime.value = 0.15;
+        const reverbGain = ctx.createGain(); reverbGain.gain.value = 0.2;
+        const reverbFilter = ctx.createBiquadFilter(); reverbFilter.type = 'lowpass'; reverbFilter.frequency.value = 2500;
+        master.connect(reverbDelay); reverbDelay.connect(reverbGain); reverbGain.connect(reverbFilter); reverbFilter.connect(ctx.destination);
+        master.connect(ctx.destination);
+
+        // ADSR envelope helper
+        function applyEnvelope(gain, time, vol, attack, decay, sustain, release, dur) {
+            gain.gain.setValueAtTime(0, time);
+            gain.gain.linearRampToValueAtTime(vol, time + attack);
+            gain.gain.linearRampToValueAtTime(vol * sustain, time + attack + decay);
+            gain.gain.setValueAtTime(vol * sustain, time + dur - release);
+            gain.gain.linearRampToValueAtTime(0.001, time + dur);
+        }
+
+        // Is ringtone mode — short, high-pitched melody only
+        const isRingtone = data.type === 'ringtone';
 
         // --- BASS LINE ---
-        let t = ctx.currentTime + 0.1;
-        const maxT = ctx.currentTime + duration;
-        let ci = 0;
-        while (t < maxT) {
-            const chord = chords[ci % chords.length];
-            const freq = 440 * Math.pow(2, (baseNote - 24 + chord[0] - 69) / 12);
-            const osc = ctx.createOscillator(); const g = ctx.createGain();
-            osc.type = 'sine'; osc.frequency.setValueAtTime(freq, t);
-            g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.25, t + 0.05); g.gain.exponentialRampToValueAtTime(0.001, t + beatDur * 2 - 0.01);
-            osc.connect(g); g.connect(master); osc.start(t); osc.stop(t + beatDur * 2);
-            if (isSong) songNodes.push(osc); else musicNodes.push(osc);
-            t += beatDur * 2; ci++;
+        if (!isRingtone) {
+            let t = ctx.currentTime + 0.1;
+            const maxT = ctx.currentTime + duration;
+            let ci = 0;
+            while (t < maxT) {
+                const chord = chords[ci % chords.length];
+                const freq = 440 * Math.pow(2, (baseNote - 24 + chord[0] - 69) / 12);
+                const osc = ctx.createOscillator(); const g = ctx.createGain();
+                osc.type = getWaveType('bass'); osc.frequency.setValueAtTime(freq, t);
+                const noteDur = beatDur * 2;
+                applyEnvelope(g, t, 0.22, 0.03, 0.1, 0.7, 0.1, noteDur);
+                osc.connect(g); g.connect(master); osc.start(t); osc.stop(t + noteDur + 0.01);
+                if (isSong) songNodes.push(osc); else musicNodes.push(osc);
+                t += noteDur; ci++;
+            }
         }
 
         // --- CHORD PAD ---
-        t = ctx.currentTime + 0.1; ci = 0;
-        while (t < maxT) {
-            const chord = chords[ci % chords.length];
-            chord.forEach(note => {
-                const freq = 440 * Math.pow(2, (baseNote + note - 69) / 12);
-                const osc = ctx.createOscillator(); const g = ctx.createGain();
-                osc.type = genre === 'classical' || genre === 'ambient' ? 'sine' : 'triangle';
-                osc.frequency.setValueAtTime(freq, t);
-                g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.08, t + 0.1); g.gain.linearRampToValueAtTime(0.06, t + beatDur * 4 - 0.5); g.gain.exponentialRampToValueAtTime(0.001, t + beatDur * 4);
-                osc.connect(g); g.connect(master); osc.start(t); osc.stop(t + beatDur * 4 + 0.01);
-                if (isSong) songNodes.push(osc); else musicNodes.push(osc);
-            });
-            t += beatDur * 4; ci++;
+        if (!isRingtone) {
+            let t = ctx.currentTime + 0.1; let ci = 0;
+            const maxT = ctx.currentTime + duration;
+            while (t < maxT) {
+                const chord = chords[ci % chords.length];
+                chord.forEach(note => {
+                    const freq = 440 * Math.pow(2, (baseNote + note - 69) / 12);
+                    const osc = ctx.createOscillator(); const g = ctx.createGain();
+                    osc.type = getWaveType('chord');
+                    osc.frequency.setValueAtTime(freq, t);
+                    const noteDur = beatDur * 4;
+                    applyEnvelope(g, t, 0.07, 0.08, 0.2, 0.6, 0.5, noteDur);
+                    osc.connect(g); g.connect(master); osc.start(t); osc.stop(t + noteDur + 0.01);
+                    if (isSong) songNodes.push(osc); else musicNodes.push(osc);
+                });
+                t += beatDur * 4; ci++;
+            }
         }
 
         // --- MELODY ---
-        t = ctx.currentTime + 0.1;
+        let t = ctx.currentTime + 0.1;
         let ni = 0;
+        const maxT = ctx.currentTime + duration;
+        const melodyOctaveShift = isRingtone ? 12 : 0; // Higher pitch for ringtone
         while (t < maxT && ni < notes.length * 3) {
             const note = notes[ni % notes.length];
-            const freq = 440 * Math.pow(2, (note.midi - 69) / 12);
+            const freq = 440 * Math.pow(2, (note.midi + melodyOctaveShift - 69) / 12);
             const dur = note.duration * beatDur;
             const osc = ctx.createOscillator(); const g = ctx.createGain();
-            osc.type = genre === 'rock' ? 'sawtooth' : genre === 'electronic' ? 'square' : 'triangle';
+            osc.type = getWaveType('melody');
             osc.frequency.setValueAtTime(freq, t);
-            const vol = note.velocity * 0.2;
-            g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + 0.02); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+            const vol = note.velocity * (isRingtone ? 0.35 : 0.18);
+            applyEnvelope(g, t, vol, 0.01, 0.05, 0.8, Math.min(0.1, dur * 0.3), dur);
             osc.connect(g); g.connect(master); osc.start(t); osc.stop(t + dur + 0.01);
             if (isSong) songNodes.push(osc); else musicNodes.push(osc);
             t += dur; ni++;
@@ -721,6 +770,589 @@
             if (songPlaying) stopSong(); else document.getElementById('song-generate-btn').click();
         });
         document.getElementById('song-stop-btn').addEventListener('click', stopSong);
+    }
+
+    // ==================== AI STORY TELLING ====================
+    function initStoryTelling() {
+        let selectedAge = 'kids';
+        // Age group selector
+        document.querySelectorAll('.age-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.age-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedAge = btn.dataset.age;
+            });
+        });
+
+        document.getElementById('story-generate-btn').addEventListener('click', async () => {
+            const genre = document.getElementById('story-genre').value;
+            const btn = document.getElementById('story-generate-btn'); btn.classList.add('loading');
+            try {
+                const data = await apiCall('/api/story/generate', 'POST', { ageGroup: selectedAge, genre });
+                document.getElementById('story-title').textContent = data.title;
+                document.getElementById('story-result').innerHTML = data.story.replace(/\n/g, '<br>');
+                document.getElementById('story-output').style.display = 'block';
+                showToast('Story generated! Enjoy reading.', 'success');
+            } catch (e) { showToast('Failed: ' + e.message, 'error'); }
+            finally { btn.classList.remove('loading'); }
+        });
+
+        // Read aloud
+        document.getElementById('story-speak-btn').addEventListener('click', () => {
+            const text = document.getElementById('story-result').innerText;
+            if (!text) return;
+            speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(text);
+            u.rate = 0.9; u.pitch = 1.0;
+            u.onstart = () => {
+                document.getElementById('story-speak-btn').style.display = 'none';
+                document.getElementById('story-stop-speak-btn').style.display = 'inline-flex';
+            };
+            u.onend = () => {
+                document.getElementById('story-speak-btn').style.display = 'inline-flex';
+                document.getElementById('story-stop-speak-btn').style.display = 'none';
+            };
+            speechSynthesis.speak(u);
+        });
+        document.getElementById('story-stop-speak-btn').addEventListener('click', () => {
+            speechSynthesis.cancel();
+            document.getElementById('story-speak-btn').style.display = 'inline-flex';
+            document.getElementById('story-stop-speak-btn').style.display = 'none';
+        });
+        document.getElementById('story-copy-btn').addEventListener('click', () => {
+            const text = document.getElementById('story-result').innerText;
+            navigator.clipboard.writeText(text).then(() => showToast('Story copied!', 'success'));
+        });
+    }
+
+    // ==================== AI PODCAST ====================
+    let podcastSpeaking = false;
+    let podcastQueue = [];
+    let podcastCancelFlag = false;
+
+    function initPodcast() {
+        let speakerCount = 3;
+        let selectedDuration = 1;
+
+        // Speaker count selector
+        document.querySelectorAll('.speaker-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.speaker-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                speakerCount = parseInt(btn.dataset.count);
+                const card3 = document.getElementById('podcast-voice-3-card');
+                if (card3) card3.style.display = speakerCount >= 3 ? 'block' : 'none';
+            });
+        });
+
+        // Duration selector
+        document.querySelectorAll('.duration-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.duration-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedDuration = parseInt(btn.dataset.duration);
+            });
+        });
+
+        // Populate voice selects
+        function loadPodcastVoices() {
+            populateVoiceSelect('podcast-voice-1');
+            populateVoiceSelect('podcast-voice-2');
+            populateVoiceSelect('podcast-voice-3');
+            // Try to pick different default voices
+            const voices = speechSynthesis.getVoices();
+            if (voices.length > 1) {
+                const s2 = document.getElementById('podcast-voice-2');
+                if (s2 && s2.options.length > 1) s2.selectedIndex = 1;
+            }
+            if (voices.length > 2) {
+                const s3 = document.getElementById('podcast-voice-3');
+                if (s3 && s3.options.length > 2) s3.selectedIndex = 2;
+            }
+        }
+        speechSynthesis.addEventListener('voiceschanged', loadPodcastVoices);
+        loadPodcastVoices();
+
+        document.getElementById('podcast-generate-btn').addEventListener('click', async () => {
+            const topic = document.getElementById('podcast-topic').value.trim();
+            if (!topic) { showToast('Enter a topic', 'error'); return; }
+            const btn = document.getElementById('podcast-generate-btn'); btn.classList.add('loading');
+            try {
+                const data = await apiCall('/api/podcast/generate', 'POST', { topic, speakerCount, duration: selectedDuration });
+                const scriptDiv = document.getElementById('podcast-script');
+                scriptDiv.innerHTML = '';
+                data.script.forEach(line => {
+                    const div = document.createElement('div');
+                    div.className = 'podcast-line speaker-' + line.speaker;
+                    div.innerHTML = `<strong>Speaker ${line.speaker}:</strong> ${line.text}`;
+                    scriptDiv.appendChild(div);
+                });
+                podcastQueue = data.script;
+                document.getElementById('podcast-output').style.display = 'block';
+                showToast('Podcast script ready! Click Play to listen.', 'success');
+            } catch (e) { showToast('Failed: ' + e.message, 'error'); }
+            finally { btn.classList.remove('loading'); }
+        });
+
+        document.getElementById('podcast-play-btn').addEventListener('click', () => {
+            if (!podcastQueue.length) { showToast('Generate a podcast first', 'error'); return; }
+            podcastCancelFlag = false;
+            playPodcastScript(podcastQueue);
+        });
+        document.getElementById('podcast-stop-btn').addEventListener('click', () => {
+            podcastCancelFlag = true;
+            speechSynthesis.cancel();
+            document.getElementById('podcast-status').textContent = 'Stopped';
+        });
+    }
+
+    function playPodcastScript(script) {
+        const voices = speechSynthesis.getVoices();
+        let idx = 0;
+        const status = document.getElementById('podcast-status');
+
+        function speakNext() {
+            if (podcastCancelFlag || idx >= script.length) {
+                status.textContent = idx >= script.length ? '✓ Podcast complete' : 'Stopped';
+                return;
+            }
+            const line = script[idx];
+            status.textContent = `Playing: Speaker ${line.speaker} (${idx + 1}/${script.length})`;
+
+            // Highlight current line
+            document.querySelectorAll('.podcast-line').forEach((el, i) => el.classList.toggle('active-line', i === idx));
+
+            const u = new SpeechSynthesisUtterance(line.text);
+            const voiceSelect = document.getElementById('podcast-voice-' + line.speaker);
+            if (voiceSelect && voices.length) {
+                const vi = parseInt(voiceSelect.value);
+                if (!isNaN(vi) && voices[vi]) u.voice = voices[vi];
+            }
+            // Vary pitch slightly per speaker
+            u.pitch = line.speaker === 1 ? 1.0 : line.speaker === 2 ? 1.15 : 0.9;
+            u.rate = 0.95;
+            u.onend = () => { idx++; setTimeout(speakNext, 300); };
+            speechSynthesis.speak(u);
+        }
+        speakNext();
+    }
+
+    // ==================== AUDIO MASHUP ====================
+    let mashupBuffers = [null, null];
+    let mashupAudioCtx = null;
+    let mashupSource = null;
+
+    function initMashup() {
+        [1, 2].forEach(n => {
+            const uploadArea = document.getElementById('mashup-upload-' + n);
+            const fileInput = document.getElementById('mashup-file-' + n);
+            const loadedDiv = document.getElementById('mashup-loaded-' + n);
+            const nameSpan = document.getElementById('mashup-name-' + n);
+            const removeBtn = document.getElementById('mashup-remove-' + n);
+
+            uploadArea.addEventListener('click', () => fileInput.click());
+            uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+            uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+            uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.classList.remove('dragover'); if (e.dataTransfer.files[0]) loadMashupFile(n, e.dataTransfer.files[0]); });
+            fileInput.addEventListener('change', () => { if (fileInput.files[0]) loadMashupFile(n, fileInput.files[0]); });
+            removeBtn.addEventListener('click', () => {
+                mashupBuffers[n - 1] = null;
+                loadedDiv.style.display = 'none'; uploadArea.style.display = 'block';
+            });
+        });
+
+        document.getElementById('mashup-balance').addEventListener('input', e => {
+            const v = parseInt(e.target.value);
+            document.getElementById('mashup-balance-val').textContent = `${v} / ${100 - v}`;
+        });
+
+        document.getElementById('mashup-generate-btn').addEventListener('click', () => {
+            if (!mashupBuffers[0] || !mashupBuffers[1]) { showToast('Upload both tracks first', 'error'); return; }
+            generateMashup();
+        });
+
+        document.getElementById('mashup-play-btn').addEventListener('click', () => {
+            if (!mashupBuffers[0] || !mashupBuffers[1]) { showToast('Generate mashup first', 'error'); return; }
+            generateMashup();
+        });
+        document.getElementById('mashup-stop-btn').addEventListener('click', stopMashup);
+        document.getElementById('mashup-download-btn').addEventListener('click', downloadMashup);
+    }
+
+    async function loadMashupFile(n, file) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const buf = await ctx.decodeAudioData(e.target.result);
+                mashupBuffers[n - 1] = buf;
+                document.getElementById('mashup-upload-' + n).style.display = 'none';
+                document.getElementById('mashup-loaded-' + n).style.display = 'flex';
+                document.getElementById('mashup-name-' + n).textContent = file.name;
+                ctx.close();
+                showToast(`Track ${n} loaded!`, 'success');
+            } catch (err) { showToast('Invalid audio file', 'error'); }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    function generateMashup() {
+        stopMashup();
+        mashupAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const mode = document.getElementById('mashup-mode').value;
+        const balance = parseInt(document.getElementById('mashup-balance').value) / 100;
+        const buf1 = mashupBuffers[0], buf2 = mashupBuffers[1];
+        const maxLen = Math.max(buf1.length, buf2.length);
+        const sr = mashupAudioCtx.sampleRate;
+
+        // Re-decode buffers to match context sample rate
+        const outBuf = mashupAudioCtx.createBuffer(2, maxLen, sr);
+
+        for (let ch = 0; ch < 2; ch++) {
+            const out = outBuf.getChannelData(ch);
+            const d1 = buf1.getChannelData(Math.min(ch, buf1.numberOfChannels - 1));
+            const d2 = buf2.getChannelData(Math.min(ch, buf2.numberOfChannels - 1));
+
+            for (let i = 0; i < maxLen; i++) {
+                const s1 = i < d1.length ? d1[i] : 0;
+                const s2 = i < d2.length ? d2[i] : 0;
+                const pos = i / maxLen;
+
+                if (mode === 'crossfade') {
+                    // Crossfade: track 1 fades out, track 2 fades in
+                    const cf = pos; // 0→1
+                    out[i] = s1 * (1 - cf) * balance * 2 + s2 * cf * (1 - balance) * 2;
+                } else if (mode === 'overlay') {
+                    out[i] = s1 * balance + s2 * (1 - balance);
+                } else { // alternate
+                    const section = Math.floor(pos * 8) % 2; // 8 alternating sections
+                    out[i] = section === 0 ? s1 * balance * 2 : s2 * (1 - balance) * 2;
+                }
+            }
+        }
+
+        mashupSource = mashupAudioCtx.createBufferSource();
+        mashupSource.buffer = outBuf;
+        mashupSource.connect(mashupAudioCtx.destination);
+        mashupSource.start();
+        mashupSource.onended = () => {
+            document.getElementById('mashup-output').style.display = 'block';
+        };
+        document.getElementById('mashup-output').style.display = 'block';
+        showToast('Mashup playing!', 'success');
+    }
+
+    function stopMashup() {
+        if (mashupSource) { try { mashupSource.stop(); } catch (e) { } mashupSource = null; }
+        if (mashupAudioCtx) { mashupAudioCtx.close().catch(() => { }); mashupAudioCtx = null; }
+    }
+
+    function downloadMashup() {
+        if (!mashupBuffers[0] || !mashupBuffers[1]) { showToast('Generate mashup first', 'error'); return; }
+        // Offline render
+        const buf1 = mashupBuffers[0], buf2 = mashupBuffers[1];
+        const maxLen = Math.max(buf1.length, buf2.length);
+        const sr = 44100;
+        const offCtx = new OfflineAudioContext(2, maxLen, sr);
+        const mode = document.getElementById('mashup-mode').value;
+        const balance = parseInt(document.getElementById('mashup-balance').value) / 100;
+        const outBuf = offCtx.createBuffer(2, maxLen, sr);
+        for (let ch = 0; ch < 2; ch++) {
+            const out = outBuf.getChannelData(ch);
+            const d1 = buf1.getChannelData(Math.min(ch, buf1.numberOfChannels - 1));
+            const d2 = buf2.getChannelData(Math.min(ch, buf2.numberOfChannels - 1));
+            for (let i = 0; i < maxLen; i++) {
+                const s1 = i < d1.length ? d1[i] : 0;
+                const s2 = i < d2.length ? d2[i] : 0;
+                const pos = i / maxLen;
+                if (mode === 'crossfade') { const cf = pos; out[i] = s1 * (1 - cf) * balance * 2 + s2 * cf * (1 - balance) * 2; }
+                else if (mode === 'overlay') { out[i] = s1 * balance + s2 * (1 - balance); }
+                else { const sec = Math.floor(pos * 8) % 2; out[i] = sec === 0 ? s1 * balance * 2 : s2 * (1 - balance) * 2; }
+            }
+        }
+        const src = offCtx.createBufferSource(); src.buffer = outBuf; src.connect(offCtx.destination); src.start();
+        offCtx.startRendering().then(rendered => {
+            const wav = audioBufferToWav(rendered);
+            const blob = new Blob([wav], { type: 'audio/wav' });
+            const url = URL.createObjectURL(blob); const a = document.createElement('a');
+            a.href = url; a.download = 'mashup.wav'; a.click(); URL.revokeObjectURL(url);
+            showToast('Mashup downloaded!', 'success');
+        });
+    }
+
+    // ==================== AUDIO STUDIO ====================
+    let studioBuffer = null;
+    let studioAudioCtx = null;
+    let studioSource = null;
+
+    function initStudio() {
+        const uploadArea = document.getElementById('studio-upload-area');
+        const fileInput = document.getElementById('studio-file');
+        const loadedDiv = document.getElementById('studio-loaded');
+        const filenameSpan = document.getElementById('studio-filename');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', e => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+        uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+        uploadArea.addEventListener('drop', e => { e.preventDefault(); uploadArea.classList.remove('dragover'); if (e.dataTransfer.files[0]) loadStudioFile(e.dataTransfer.files[0]); });
+        fileInput.addEventListener('change', () => { if (fileInput.files[0]) loadStudioFile(fileInput.files[0]); });
+
+        document.getElementById('studio-remove').addEventListener('click', () => {
+            studioBuffer = null; loadedDiv.style.display = 'none'; uploadArea.style.display = 'block';
+            document.getElementById('studio-controls').style.display = 'none';
+        });
+
+        // Sliders
+        document.getElementById('studio-speed').addEventListener('input', e => {
+            document.getElementById('studio-speed-val').textContent = parseFloat(e.target.value).toFixed(2) + 'x';
+        });
+        document.getElementById('studio-reverb').addEventListener('input', e => {
+            document.getElementById('studio-reverb-val').textContent = e.target.value + '%';
+        });
+        document.getElementById('studio-gain').addEventListener('input', e => {
+            document.getElementById('studio-gain-val').textContent = parseFloat(e.target.value).toFixed(1) + 'x';
+        });
+        document.getElementById('studio-bass').addEventListener('input', e => {
+            document.getElementById('studio-bass-val').textContent = e.target.value + ' dB';
+        });
+
+        // Presets
+        document.querySelectorAll('.studio-preset').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const preset = btn.dataset.preset;
+                const presets = {
+                    'speedup': { speed: 1.5, reverb: 0, gain: 1, bass: 0 },
+                    'slowdown': { speed: 0.7, reverb: 0, gain: 1, bass: 0 },
+                    'slowed-reverb': { speed: 0.8, reverb: 70, gain: 1.1, bass: 5 },
+                    'enhance': { speed: 1.0, reverb: 15, gain: 1.8, bass: 3 },
+                    'bass-boost': { speed: 1.0, reverb: 10, gain: 1.3, bass: 15 },
+                    'reset': { speed: 1.0, reverb: 0, gain: 1.0, bass: 0 }
+                };
+                const p = presets[preset] || presets['reset'];
+                document.getElementById('studio-speed').value = p.speed;
+                document.getElementById('studio-speed-val').textContent = p.speed.toFixed(2) + 'x';
+                document.getElementById('studio-reverb').value = p.reverb;
+                document.getElementById('studio-reverb-val').textContent = p.reverb + '%';
+                document.getElementById('studio-gain').value = p.gain;
+                document.getElementById('studio-gain-val').textContent = p.gain.toFixed(1) + 'x';
+                document.getElementById('studio-bass').value = p.bass;
+                document.getElementById('studio-bass-val').textContent = p.bass + ' dB';
+                showToast(`Preset "${preset}" applied`, 'info');
+            });
+        });
+
+        document.getElementById('studio-preview-btn').addEventListener('click', () => {
+            if (!studioBuffer) { showToast('Upload audio first', 'error'); return; }
+            playStudioPreview();
+        });
+        document.getElementById('studio-stop-btn').addEventListener('click', stopStudio);
+        document.getElementById('studio-download-btn').addEventListener('click', downloadStudio);
+    }
+
+    async function loadStudioFile(file) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                studioBuffer = await ctx.decodeAudioData(e.target.result);
+                document.getElementById('studio-upload-area').style.display = 'none';
+                document.getElementById('studio-loaded').style.display = 'flex';
+                document.getElementById('studio-filename').textContent = file.name;
+                document.getElementById('studio-controls').style.display = 'block';
+                ctx.close();
+                showToast('Audio loaded! Apply effects below.', 'success');
+            } catch (err) { showToast('Invalid audio file', 'error'); }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    function playStudioPreview() {
+        stopStudio();
+        studioAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const speed = parseFloat(document.getElementById('studio-speed').value);
+        const reverbAmt = parseInt(document.getElementById('studio-reverb').value) / 100;
+        const gainVal = parseFloat(document.getElementById('studio-gain').value);
+        const bassVal = parseInt(document.getElementById('studio-bass').value);
+
+        studioSource = studioAudioCtx.createBufferSource();
+        studioSource.buffer = studioBuffer;
+        studioSource.playbackRate.value = speed;
+
+        // Gain
+        const gainNode = studioAudioCtx.createGain();
+        gainNode.gain.value = gainVal;
+
+        // Bass boost
+        const bassFilter = studioAudioCtx.createBiquadFilter();
+        bassFilter.type = 'lowshelf'; bassFilter.frequency.value = 200; bassFilter.gain.value = bassVal;
+
+        // Reverb (delay-based)
+        const delay1 = studioAudioCtx.createDelay(); delay1.delayTime.value = 0.08 * reverbAmt + 0.01;
+        const delay2 = studioAudioCtx.createDelay(); delay2.delayTime.value = 0.16 * reverbAmt + 0.01;
+        const reverbGain = studioAudioCtx.createGain(); reverbGain.gain.value = reverbAmt * 0.5;
+        const reverbFilter = studioAudioCtx.createBiquadFilter(); reverbFilter.type = 'lowpass'; reverbFilter.frequency.value = 3000;
+
+        studioSource.connect(gainNode);
+        gainNode.connect(bassFilter);
+        bassFilter.connect(studioAudioCtx.destination);
+
+        // Reverb chain
+        if (reverbAmt > 0) {
+            bassFilter.connect(delay1); delay1.connect(reverbGain); reverbGain.connect(reverbFilter);
+            reverbFilter.connect(delay2); delay2.connect(studioAudioCtx.destination);
+            bassFilter.connect(delay2); // Second tap
+        }
+
+        studioSource.start();
+        studioSource.onended = () => showToast('Preview complete', 'info');
+        showToast('Playing preview...', 'info');
+    }
+
+    function stopStudio() {
+        if (studioSource) { try { studioSource.stop(); } catch (e) { } studioSource = null; }
+        if (studioAudioCtx) { studioAudioCtx.close().catch(() => { }); studioAudioCtx = null; }
+    }
+
+    function downloadStudio() {
+        if (!studioBuffer) { showToast('Upload audio first', 'error'); return; }
+        const speed = parseFloat(document.getElementById('studio-speed').value);
+        const gainVal = parseFloat(document.getElementById('studio-gain').value);
+        const bassVal = parseInt(document.getElementById('studio-bass').value);
+        const reverbAmt = parseInt(document.getElementById('studio-reverb').value) / 100;
+        const newLen = Math.ceil(studioBuffer.length / speed);
+        const sr = studioBuffer.sampleRate;
+        const offCtx = new OfflineAudioContext(studioBuffer.numberOfChannels, newLen, sr);
+        const src = offCtx.createBufferSource(); src.buffer = studioBuffer; src.playbackRate.value = speed;
+        const g = offCtx.createGain(); g.gain.value = gainVal;
+        const bf = offCtx.createBiquadFilter(); bf.type = 'lowshelf'; bf.frequency.value = 200; bf.gain.value = bassVal;
+        src.connect(g); g.connect(bf); bf.connect(offCtx.destination);
+        if (reverbAmt > 0) {
+            const d = offCtx.createDelay(); d.delayTime.value = 0.1 * reverbAmt + 0.01;
+            const rg = offCtx.createGain(); rg.gain.value = reverbAmt * 0.4;
+            bf.connect(d); d.connect(rg); rg.connect(offCtx.destination);
+        }
+        src.start();
+        offCtx.startRendering().then(rendered => {
+            const wav = audioBufferToWav(rendered);
+            const blob = new Blob([wav], { type: 'audio/wav' });
+            const url = URL.createObjectURL(blob); const a = document.createElement('a');
+            a.href = url; a.download = 'studio-output.wav'; a.click(); URL.revokeObjectURL(url);
+            showToast('Audio downloaded!', 'success');
+        });
+    }
+
+    // WAV encoder helper
+    function audioBufferToWav(buffer) {
+        const numCh = buffer.numberOfChannels, sr = buffer.sampleRate, len = buffer.length;
+        const bytesPerSample = 2, blockAlign = numCh * bytesPerSample;
+        const dataSize = len * blockAlign;
+        const bufSize = 44 + dataSize;
+        const ab = new ArrayBuffer(bufSize); const view = new DataView(ab);
+        function writeStr(offset, str) { for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i)); }
+        writeStr(0, 'RIFF'); view.setUint32(4, bufSize - 8, true); writeStr(8, 'WAVE');
+        writeStr(12, 'fmt '); view.setUint32(16, 16, true); view.setUint16(20, 1, true);
+        view.setUint16(22, numCh, true); view.setUint32(24, sr, true);
+        view.setUint32(28, sr * blockAlign, true); view.setUint16(32, blockAlign, true);
+        view.setUint16(34, 16, true); writeStr(36, 'data'); view.setUint32(40, dataSize, true);
+        let offset = 44;
+        const channels = []; for (let i = 0; i < numCh; i++) channels.push(buffer.getChannelData(i));
+        for (let i = 0; i < len; i++) {
+            for (let ch = 0; ch < numCh; ch++) {
+                let s = Math.max(-1, Math.min(1, channels[ch][i]));
+                view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+                offset += 2;
+            }
+        }
+        return ab;
+    }
+
+    // ==================== MOOD IDENTIFIER ====================
+    let moodRecording = false;
+    let moodRecognition = null;
+
+    function initMood() {
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.getElementById(btn.dataset.tab + '-tab').classList.add('active');
+            });
+        });
+
+        // Voice recording
+        const recordBtn = document.getElementById('mood-record-btn');
+        if (recordBtn) {
+            recordBtn.addEventListener('click', () => {
+                if (moodRecording) {
+                    if (moodRecognition) moodRecognition.stop();
+                    moodRecording = false;
+                    recordBtn.classList.remove('recording');
+                    document.getElementById('mood-record-status').textContent = 'Click to start recording';
+                    return;
+                }
+                if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+                    showToast('Speech recognition not supported', 'error'); return;
+                }
+                const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+                moodRecognition = new SR();
+                moodRecognition.continuous = true; moodRecognition.interimResults = true;
+                moodRecognition.onresult = (e) => {
+                    let text = '';
+                    for (let i = 0; i < e.results.length; i++) text += e.results[i][0].transcript;
+                    document.getElementById('mood-speech-result').textContent = text;
+                    document.getElementById('mood-input-text').value = text;
+                };
+                moodRecognition.onerror = () => { showToast('Recording error', 'error'); moodRecording = false; recordBtn.classList.remove('recording'); };
+                moodRecognition.onend = () => { moodRecording = false; recordBtn.classList.remove('recording'); document.getElementById('mood-record-status').textContent = 'Recording complete'; };
+                moodRecognition.start();
+                moodRecording = true;
+                recordBtn.classList.add('recording');
+                document.getElementById('mood-record-status').textContent = 'Listening...';
+            });
+        }
+
+        // Detect mood
+        document.getElementById('mood-detect-btn').addEventListener('click', async () => {
+            const text = document.getElementById('mood-input-text').value.trim();
+            if (!text) { showToast('Enter or record some text', 'error'); return; }
+            const btn = document.getElementById('mood-detect-btn'); btn.classList.add('loading');
+            try {
+                const data = await apiCall('/api/mood/detect', 'POST', { text });
+                const moodEmojis = {
+                    happy: '😊', sad: '😢', angry: '😠', anxious: '😰',
+                    calm: '😌', energetic: '⚡', romantic: '❤️', nostalgic: '💭', neutral: '😐'
+                };
+                document.getElementById('mood-emoji').textContent = moodEmojis[data.mood] || '🤔';
+                document.getElementById('mood-label').textContent = data.mood.charAt(0).toUpperCase() + data.mood.slice(1);
+                document.getElementById('mood-confidence').textContent = `Confidence: ${data.confidence}%`;
+                document.getElementById('mood-secondary').textContent = data.secondaryMood ? `Also detected: ${data.secondaryMood}` : '';
+
+                // Breakdown bars
+                const breakdownDiv = document.getElementById('mood-breakdown');
+                breakdownDiv.innerHTML = '<h4>Mood Breakdown</h4>';
+                const maxScore = Math.max(...Object.values(data.scores), 1);
+                for (const [mood, score] of Object.entries(data.scores)) {
+                    const pct = Math.round((score / maxScore) * 100);
+                    breakdownDiv.innerHTML += `
+                        <div class="mood-bar-row">
+                            <span class="mood-bar-label">${moodEmojis[mood] || ''} ${mood}</span>
+                            <div class="mood-bar-track"><div class="mood-bar-fill" style="width:${pct}%"></div></div>
+                            <span class="mood-bar-score">${score}</span>
+                        </div>`;
+                }
+
+                // Stats
+                document.getElementById('mood-stats').innerHTML = `
+                    <div class="mood-stat"><strong>Words analyzed:</strong> ${data.analysis.wordCount}</div>
+                    <div class="mood-stat"><strong>Sentences:</strong> ${data.analysis.sentenceCount}</div>`;
+
+                document.getElementById('mood-output').style.display = 'block';
+                showToast('Mood detected!', 'success');
+            } catch (e) { showToast('Failed: ' + e.message, 'error'); }
+            finally { btn.classList.remove('loading'); }
+        });
     }
 
     // ==================== PARTICLES & ABOUT ====================

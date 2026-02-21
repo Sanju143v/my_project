@@ -161,6 +161,31 @@
             <h3>Song Generation</h3>
             <p>Turn lyrics into a full song with AI vocals, background music, and raaga.</p>
           </div>
+          <div class="feature-card" data-model="storytelling">
+            <div class="feature-icon" style="--accent: #8b5cf6;"><i class="fas fa-book-open"></i></div>
+            <h3>AI Story Telling</h3>
+            <p>Generate professional stories for kids, adults, and seniors with rich narratives.</p>
+          </div>
+          <div class="feature-card" data-model="podcast">
+            <div class="feature-icon" style="--accent: #ec4899;"><i class="fas fa-podcast"></i></div>
+            <h3>AI Podcast</h3>
+            <p>Create multi-speaker professional podcasts with customizable voices and duration.</p>
+          </div>
+          <div class="feature-card" data-model="mashup">
+            <div class="feature-icon" style="--accent: #14b8a6;"><i class="fas fa-random"></i></div>
+            <h3>Audio Mashup</h3>
+            <p>Upload two songs and generate a professional audio mashup blend.</p>
+          </div>
+          <div class="feature-card" data-model="studio">
+            <div class="feature-icon" style="--accent: #f97316;"><i class="fas fa-sliders-h"></i></div>
+            <h3>Audio Studio</h3>
+            <p>Speed up, slow down, add reverb, and enhance any audio file professionally.</p>
+          </div>
+          <div class="feature-card" data-model="mood">
+            <div class="feature-icon" style="--accent: #a855f7;"><i class="fas fa-brain"></i></div>
+            <h3>Mood Identifier</h3>
+            <p>Detect mood and emotions from text or voice with AI-powered analysis.</p>
+          </div>
         </div>
       </div>
       <div class="stats-section">
@@ -169,7 +194,7 @@
           <div class="stat-label">Languages Supported</div>
         </div>
         <div class="stat-card">
-          <div class="stat-number" data-count="5">0</div>
+          <div class="stat-number" data-count="10">0</div>
           <div class="stat-label">AI Models</div>
         </div>
         <div class="stat-card">
@@ -277,6 +302,96 @@
               <li><i class="fas fa-check"></i> Full Vocal Performance</li>
             </ul>
             <button class="btn btn-primary btn-full" onclick="openModel('song')"><i class="fas fa-arrow-right"></i>
+              Launch Model</button>
+          </div>
+        </div>
+        <!-- AI Story Telling -->
+        <div class="model-card" id="model-card-storytelling">
+          <div class="model-card-glow" style="--glow: #8b5cf6;"></div>
+          <div class="model-card-content">
+            <div class="model-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);"><i
+                class="fas fa-book-open"></i></div>
+            <h3>AI Story Telling</h3>
+            <p>Generate captivating stories tailored for different age groups.</p>
+            <ul class="model-features-list">
+              <li><i class="fas fa-check"></i> Kids Comic Stories</li>
+              <li><i class="fas fa-check"></i> Adult Fiction</li>
+              <li><i class="fas fa-check"></i> Senior Wisdom Tales</li>
+              <li><i class="fas fa-check"></i> Read Aloud Feature</li>
+            </ul>
+            <button class="btn btn-primary btn-full" onclick="openModel('storytelling')"><i class="fas fa-arrow-right"></i>
+              Launch Model</button>
+          </div>
+        </div>
+        <!-- AI Podcast -->
+        <div class="model-card" id="model-card-podcast">
+          <div class="model-card-glow" style="--glow: #ec4899;"></div>
+          <div class="model-card-content">
+            <div class="model-icon" style="background: linear-gradient(135deg, #ec4899, #d946ef);"><i
+                class="fas fa-podcast"></i></div>
+            <h3>AI Podcast</h3>
+            <p>Create professional multi-speaker podcasts on any topic.</p>
+            <ul class="model-features-list">
+              <li><i class="fas fa-check"></i> Up to 3 Speakers</li>
+              <li><i class="fas fa-check"></i> 1, 5, or 10 Minutes</li>
+              <li><i class="fas fa-check"></i> All TTS Voices</li>
+              <li><i class="fas fa-check"></i> Professional Quality</li>
+            </ul>
+            <button class="btn btn-primary btn-full" onclick="openModel('podcast')"><i class="fas fa-arrow-right"></i>
+              Launch Model</button>
+          </div>
+        </div>
+        <!-- Audio Mashup -->
+        <div class="model-card" id="model-card-mashup">
+          <div class="model-card-glow" style="--glow: #14b8a6;"></div>
+          <div class="model-card-content">
+            <div class="model-icon" style="background: linear-gradient(135deg, #14b8a6, #0d9488);"><i
+                class="fas fa-random"></i></div>
+            <h3>Audio Mashup</h3>
+            <p>Upload two songs and create a seamless audio mashup blend.</p>
+            <ul class="model-features-list">
+              <li><i class="fas fa-check"></i> Upload 2 Songs</li>
+              <li><i class="fas fa-check"></i> Auto Crossfade</li>
+              <li><i class="fas fa-check"></i> Preview & Download</li>
+              <li><i class="fas fa-check"></i> Professional Blend</li>
+            </ul>
+            <button class="btn btn-primary btn-full" onclick="openModel('mashup')"><i class="fas fa-arrow-right"></i>
+              Launch Model</button>
+          </div>
+        </div>
+        <!-- Audio Studio -->
+        <div class="model-card" id="model-card-studio">
+          <div class="model-card-glow" style="--glow: #f97316;"></div>
+          <div class="model-card-content">
+            <div class="model-icon" style="background: linear-gradient(135deg, #f97316, #ea580c);"><i
+                class="fas fa-sliders-h"></i></div>
+            <h3>Audio Studio</h3>
+            <p>Professional audio editing — speed, reverb, enhance, and more.</p>
+            <ul class="model-features-list">
+              <li><i class="fas fa-check"></i> Speed Up / Slow Down</li>
+              <li><i class="fas fa-check"></i> Slowed + Reverb</li>
+              <li><i class="fas fa-check"></i> Audio Enhance</li>
+              <li><i class="fas fa-check"></i> Download Output</li>
+            </ul>
+            <button class="btn btn-primary btn-full" onclick="openModel('studio')"><i class="fas fa-arrow-right"></i>
+              Launch Model</button>
+          </div>
+        </div>
+        <!-- Mood Identifier -->
+        <div class="model-card" id="model-card-mood">
+          <div class="model-card-glow" style="--glow: #a855f7;"></div>
+          <div class="model-card-content">
+            <div class="model-icon" style="background: linear-gradient(135deg, #a855f7, #9333ea);"><i
+                class="fas fa-brain"></i></div>
+            <h3>Mood Identifier</h3>
+            <p>AI-powered mood and emotion detection from text or voice.</p>
+            <ul class="model-features-list">
+              <li><i class="fas fa-check"></i> Text Analysis</li>
+              <li><i class="fas fa-check"></i> Voice Upload</li>
+              <li><i class="fas fa-check"></i> Mood Breakdown</li>
+              <li><i class="fas fa-check"></i> Confidence Score</li>
+            </ul>
+            <button class="btn btn-primary btn-full" onclick="openModel('mood')"><i class="fas fa-arrow-right"></i>
               Launch Model</button>
           </div>
         </div>
@@ -580,6 +695,20 @@
               <option value="beat">Beat / Rhythm</option>
               <option value="chord">Chord Progression</option>
               <option value="full">Full Composition</option>
+              <option value="ringtone">🔔 Ringtone</option>
+            </select>
+          </div>
+          <div class="option-group">
+            <label><i class="fas fa-music"></i> Instrument</label>
+            <select id="music-instrument">
+              <option value="auto">Auto (Genre Default)</option>
+              <option value="piano">🎹 Piano</option>
+              <option value="guitar">🎸 Guitar</option>
+              <option value="flute">🪈 Flute</option>
+              <option value="sitar">🎵 Sitar</option>
+              <option value="violin">🎻 Violin</option>
+              <option value="drums">🥁 Drums</option>
+              <option value="synth">🎛️ Synthesizer</option>
             </select>
           </div>
           <div class="option-group">
@@ -589,7 +718,7 @@
           </div>
           <div class="option-group">
             <label><i class="fas fa-clock"></i> Duration (seconds)</label>
-            <input type="range" id="music-duration" min="5" max="30" value="15" />
+            <input type="range" id="music-duration" min="5" max="60" value="15" />
             <span id="music-duration-val">15s</span>
           </div>
         </div>
@@ -689,6 +818,280 @@
             <button id="song-stop-btn" class="stop-btn"><i class="fas fa-stop"></i></button>
             <span id="song-status" style="margin-left: 1rem; font-size: 0.875rem; color: var(--text-secondary);"></span>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== AI STORY TELLING PAGE ===== -->
+    <div id="storytelling-page" class="app-section">
+      <div class="model-page-header">
+        <button class="btn btn-glass btn-sm" onclick="openModel('back')"><i class="fas fa-arrow-left"></i> Back to Models</button>
+        <h1><i class="fas fa-book-open" style="color: #8b5cf6;"></i> AI Story Telling</h1>
+        <p>Generate captivating stories tailored for different age groups</p>
+      </div>
+      <div class="model-workspace">
+        <div class="story-options-grid">
+          <div class="option-group">
+            <label><i class="fas fa-users"></i> Age Group</label>
+            <div class="age-group-selector">
+              <button class="age-btn active" data-age="kids"><i class="fas fa-child"></i> Kids</button>
+              <button class="age-btn" data-age="adults"><i class="fas fa-user"></i> Adults</button>
+              <button class="age-btn" data-age="seniors"><i class="fas fa-user-clock"></i> Seniors</button>
+            </div>
+          </div>
+          <div class="option-group">
+            <label><i class="fas fa-theater-masks"></i> Genre</label>
+            <select id="story-genre">
+              <option value="adventure">🗺️ Adventure</option>
+              <option value="moral">💡 Moral / Life Lesson</option>
+              <option value="funny">😂 Funny / Comedy</option>
+              <option value="mystery">🔍 Mystery</option>
+              <option value="drama">🎭 Drama</option>
+              <option value="wisdom">🧠 Wisdom</option>
+              <option value="nostalgia">💭 Nostalgia</option>
+              <option value="reflections">🌅 Reflections</option>
+            </select>
+          </div>
+        </div>
+        <button id="story-generate-btn" class="btn btn-primary btn-lg btn-full"><i class="fas fa-magic"></i> Generate Story</button>
+        <div id="story-output" class="output-section" style="display:none;">
+          <div class="story-output-header">
+            <h3><i class="fas fa-book"></i> <span id="story-title"></span></h3>
+            <div class="story-actions">
+              <button id="story-speak-btn" class="btn btn-glass btn-sm"><i class="fas fa-volume-up"></i> Read Aloud</button>
+              <button id="story-stop-speak-btn" class="btn btn-glass btn-sm" style="display:none;"><i class="fas fa-stop"></i> Stop</button>
+              <button id="story-copy-btn" class="btn btn-glass btn-sm"><i class="fas fa-copy"></i> Copy</button>
+            </div>
+          </div>
+          <div id="story-result" class="story-text"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== AI PODCAST PAGE ===== -->
+    <div id="podcast-page" class="app-section">
+      <div class="model-page-header">
+        <button class="btn btn-glass btn-sm" onclick="openModel('back')"><i class="fas fa-arrow-left"></i> Back to Models</button>
+        <h1><i class="fas fa-podcast" style="color: #ec4899;"></i> AI Podcast</h1>
+        <p>Create professional multi-speaker podcasts with AI-generated conversations</p>
+      </div>
+      <div class="model-workspace">
+        <div class="podcast-options-grid">
+          <div class="option-group">
+            <label><i class="fas fa-lightbulb"></i> Topic</label>
+            <input type="text" id="podcast-topic" placeholder="e.g., AI in healthcare, startup culture, space exploration..." />
+          </div>
+          <div class="option-group">
+            <label><i class="fas fa-users"></i> Number of Speakers</label>
+            <div class="speaker-count-selector">
+              <button class="speaker-btn" data-count="2">2 Speakers</button>
+              <button class="speaker-btn active" data-count="3">3 Speakers</button>
+            </div>
+          </div>
+          <div class="option-group">
+            <label><i class="fas fa-clock"></i> Duration</label>
+            <div class="duration-selector">
+              <button class="duration-btn active" data-duration="1">1 Min</button>
+              <button class="duration-btn" data-duration="5">5 Min</button>
+              <button class="duration-btn" data-duration="10">10 Min</button>
+            </div>
+          </div>
+        </div>
+        <!-- Voice Selection Per Speaker -->
+        <div class="podcast-voices" id="podcast-voices">
+          <h4><i class="fas fa-microphone-alt"></i> Voice Settings</h4>
+          <div class="podcast-voice-grid">
+            <div class="podcast-voice-card">
+              <span class="speaker-label">Speaker 1 (Host)</span>
+              <select id="podcast-voice-1" class="podcast-voice-select"></select>
+            </div>
+            <div class="podcast-voice-card">
+              <span class="speaker-label">Speaker 2 (Guest)</span>
+              <select id="podcast-voice-2" class="podcast-voice-select"></select>
+            </div>
+            <div class="podcast-voice-card" id="podcast-voice-3-card">
+              <span class="speaker-label">Speaker 3 (Guest 2)</span>
+              <select id="podcast-voice-3" class="podcast-voice-select"></select>
+            </div>
+          </div>
+        </div>
+        <button id="podcast-generate-btn" class="btn btn-primary btn-lg btn-full"><i class="fas fa-play"></i> Generate Podcast</button>
+        <div id="podcast-output" class="output-section" style="display:none;">
+          <h3><i class="fas fa-podcast"></i> Generated Podcast</h3>
+          <div id="podcast-script" class="podcast-script"></div>
+          <div class="podcast-controls">
+            <button id="podcast-play-btn" class="btn btn-primary"><i class="fas fa-play"></i> Play Podcast</button>
+            <button id="podcast-stop-btn" class="btn btn-glass"><i class="fas fa-stop"></i> Stop</button>
+            <span id="podcast-status" class="podcast-status"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== AUDIO MASHUP PAGE ===== -->
+    <div id="mashup-page" class="app-section">
+      <div class="model-page-header">
+        <button class="btn btn-glass btn-sm" onclick="openModel('back')"><i class="fas fa-arrow-left"></i> Back to Models</button>
+        <h1><i class="fas fa-random" style="color: #14b8a6;"></i> Audio Mashup</h1>
+        <p>Upload two audio files and create a stunning mashup blend</p>
+      </div>
+      <div class="model-workspace">
+        <div class="mashup-upload-grid">
+          <div class="mashup-track">
+            <h4><i class="fas fa-music"></i> Track 1</h4>
+            <div class="upload-area" id="mashup-upload-1">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <p>Drop Track 1 or <span class="upload-link">browse</span></p>
+              <p class="upload-hint">MP3, WAV, OGG (max 15MB)</p>
+              <input type="file" id="mashup-file-1" accept="audio/*" hidden />
+            </div>
+            <div id="mashup-loaded-1" class="uploaded-file" style="display:none;">
+              <i class="fas fa-file-audio"></i>
+              <span id="mashup-name-1"></span>
+              <button class="btn-icon" id="mashup-remove-1"><i class="fas fa-times"></i></button>
+            </div>
+          </div>
+          <div class="mashup-blend-icon"><i class="fas fa-plus-circle"></i></div>
+          <div class="mashup-track">
+            <h4><i class="fas fa-music"></i> Track 2</h4>
+            <div class="upload-area" id="mashup-upload-2">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <p>Drop Track 2 or <span class="upload-link">browse</span></p>
+              <p class="upload-hint">MP3, WAV, OGG (max 15MB)</p>
+              <input type="file" id="mashup-file-2" accept="audio/*" hidden />
+            </div>
+            <div id="mashup-loaded-2" class="uploaded-file" style="display:none;">
+              <i class="fas fa-file-audio"></i>
+              <span id="mashup-name-2"></span>
+              <button class="btn-icon" id="mashup-remove-2"><i class="fas fa-times"></i></button>
+            </div>
+          </div>
+        </div>
+        <div class="mashup-options">
+          <div class="option-group">
+            <label><i class="fas fa-exchange-alt"></i> Blend Mode</label>
+            <select id="mashup-mode">
+              <option value="crossfade">Crossfade Blend</option>
+              <option value="overlay">Overlay Mix</option>
+              <option value="alternate">Alternating Sections</option>
+            </select>
+          </div>
+          <div class="option-group">
+            <label><i class="fas fa-balance-scale"></i> Track Balance</label>
+            <input type="range" id="mashup-balance" min="0" max="100" value="50" />
+            <span id="mashup-balance-val">50 / 50</span>
+          </div>
+        </div>
+        <button id="mashup-generate-btn" class="btn btn-primary btn-lg btn-full"><i class="fas fa-magic"></i> Generate Mashup</button>
+        <div id="mashup-output" class="output-section" style="display:none;">
+          <h3><i class="fas fa-wave-square"></i> Your Mashup</h3>
+          <div class="music-controls">
+            <button id="mashup-play-btn" class="play-btn"><i class="fas fa-play"></i></button>
+            <button id="mashup-stop-btn" class="stop-btn"><i class="fas fa-stop"></i></button>
+            <button id="mashup-download-btn" class="btn btn-glass btn-sm"><i class="fas fa-download"></i> Download</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== AUDIO STUDIO PAGE ===== -->
+    <div id="studio-page" class="app-section">
+      <div class="model-page-header">
+        <button class="btn btn-glass btn-sm" onclick="openModel('back')"><i class="fas fa-arrow-left"></i> Back to Models</button>
+        <h1><i class="fas fa-sliders-h" style="color: #f97316;"></i> Audio Studio</h1>
+        <p>Upload audio and apply professional effects — speed, reverb, enhance, and more</p>
+      </div>
+      <div class="model-workspace">
+        <div class="upload-area" id="studio-upload-area">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <p>Drop your audio file or <span class="upload-link">browse</span></p>
+          <p class="upload-hint">MP3, WAV, OGG (max 20MB)</p>
+          <input type="file" id="studio-file" accept="audio/*" hidden />
+        </div>
+        <div id="studio-loaded" class="uploaded-file" style="display:none;">
+          <i class="fas fa-file-audio"></i>
+          <span id="studio-filename"></span>
+          <button class="btn-icon" id="studio-remove"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="studio-controls" class="studio-controls" style="display:none;">
+          <h4><i class="fas fa-magic"></i> Effects Panel</h4>
+          <div class="studio-effects-grid">
+            <div class="effect-card">
+              <label><i class="fas fa-tachometer-alt"></i> Speed</label>
+              <input type="range" id="studio-speed" min="0.25" max="3" step="0.05" value="1" />
+              <span id="studio-speed-val">1.00x</span>
+            </div>
+            <div class="effect-card">
+              <label><i class="fas fa-water"></i> Reverb</label>
+              <input type="range" id="studio-reverb" min="0" max="100" value="0" />
+              <span id="studio-reverb-val">0%</span>
+            </div>
+            <div class="effect-card">
+              <label><i class="fas fa-volume-up"></i> Gain / Enhance</label>
+              <input type="range" id="studio-gain" min="0.5" max="3" step="0.1" value="1" />
+              <span id="studio-gain-val">1.0x</span>
+            </div>
+            <div class="effect-card">
+              <label><i class="fas fa-adjust"></i> Bass Boost</label>
+              <input type="range" id="studio-bass" min="-10" max="20" value="0" />
+              <span id="studio-bass-val">0 dB</span>
+            </div>
+          </div>
+          <div class="studio-presets">
+            <h4><i class="fas fa-star"></i> Quick Presets</h4>
+            <div class="preset-buttons">
+              <button class="btn btn-glass btn-sm studio-preset" data-preset="speedup"><i class="fas fa-forward"></i> Speed Up</button>
+              <button class="btn btn-glass btn-sm studio-preset" data-preset="slowdown"><i class="fas fa-backward"></i> Slow Down</button>
+              <button class="btn btn-glass btn-sm studio-preset" data-preset="slowed-reverb"><i class="fas fa-water"></i> Slowed + Reverb</button>
+              <button class="btn btn-glass btn-sm studio-preset" data-preset="enhance"><i class="fas fa-magic"></i> Enhance</button>
+              <button class="btn btn-glass btn-sm studio-preset" data-preset="bass-boost"><i class="fas fa-drum"></i> Bass Boost</button>
+              <button class="btn btn-glass btn-sm studio-preset" data-preset="reset"><i class="fas fa-undo"></i> Reset</button>
+            </div>
+          </div>
+          <div class="studio-action-btns">
+            <button id="studio-preview-btn" class="btn btn-primary btn-lg"><i class="fas fa-play"></i> Preview</button>
+            <button id="studio-stop-btn" class="btn btn-glass btn-lg"><i class="fas fa-stop"></i> Stop</button>
+            <button id="studio-download-btn" class="btn btn-glass btn-lg"><i class="fas fa-download"></i> Download</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MOOD IDENTIFIER PAGE ===== -->
+    <div id="mood-page" class="app-section">
+      <div class="model-page-header">
+        <button class="btn btn-glass btn-sm" onclick="openModel('back')"><i class="fas fa-arrow-left"></i> Back to Models</button>
+        <h1><i class="fas fa-brain" style="color: #a855f7;"></i> Mood Identifier</h1>
+        <p>Detect mood and emotions from text or voice with AI-powered analysis</p>
+      </div>
+      <div class="model-workspace">
+        <div class="workspace-tabs">
+          <button class="tab-btn active" data-tab="mood-text"><i class="fas fa-keyboard"></i> Text Input</button>
+          <button class="tab-btn" data-tab="mood-voice"><i class="fas fa-microphone"></i> Voice Input</button>
+        </div>
+        <div id="mood-text-tab" class="tab-content active">
+          <div class="input-area">
+            <label>Enter text to analyze mood</label>
+            <textarea id="mood-input-text" placeholder="Type or paste text here... Express your feelings, describe a situation, or paste any text you want to analyze." rows="6"></textarea>
+          </div>
+        </div>
+        <div id="mood-voice-tab" class="tab-content">
+          <div class="speech-record-area">
+            <button id="mood-record-btn" class="record-btn"><i class="fas fa-microphone"></i></button>
+            <p id="mood-record-status">Click to start recording</p>
+            <div id="mood-speech-result" class="speech-result"></div>
+          </div>
+        </div>
+        <button id="mood-detect-btn" class="btn btn-primary btn-lg btn-full"><i class="fas fa-brain"></i> Detect Mood</button>
+        <div id="mood-output" class="output-section" style="display:none;">
+          <div class="mood-result">
+            <div class="mood-emoji" id="mood-emoji"></div>
+            <h2 id="mood-label"></h2>
+            <p id="mood-confidence"></p>
+            <p id="mood-secondary"></p>
+          </div>
+          <div class="mood-breakdown" id="mood-breakdown"></div>
+          <div class="mood-stats" id="mood-stats"></div>
         </div>
       </div>
     </div>
